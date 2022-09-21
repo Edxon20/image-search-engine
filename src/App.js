@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import Formulario from './components/Formulario.jsx';
+import ListadoImagenes from './components/ListadoImagenes.jsx';
 
 function App() {
 
   //State de la app
   const [busqueda, setBusqueda] = useState('');
+  const [imagenes, setImagenes] = useState([]);
+  const [paginaactual, setPaginaactual] = useState(1);
+  const [totalpaginas, setTotalPaginas]= useState(1);
 
   useEffect(() => {
 
@@ -19,12 +23,37 @@ function App() {
       const respuesta = await fetch(url);
       const resultado = await respuesta.json();
 
-      setBusqueda(resultado.hits);
+      setImagenes(resultado.hits);
+
+      //Calcular el total de paginas
+      const calcucularTotalPaginas = Math.ceil(resultado.totalHits / imagenesPorPagina);
+      setTotalPaginas(calcucularTotalPaginas);
 
     }
     consultarApi();
 
   }, [busqueda])
+
+  //Definir la pagina anterior
+  const paginaAnterior = () => {
+
+    const nuevaPaginaActual = paginaactual - 1;
+
+    if(nuevaPaginaActual === 0) return;
+    
+    setPaginaactual(nuevaPaginaActual);
+
+  }
+  //Definir la pagina siguiente
+
+  const paginaSiguiente = () => {
+    const nuevaPaginaActual = paginaactual + 1;
+
+    if(nuevaPaginaActual > totalpaginas) return;
+    
+    setPaginaactual(nuevaPaginaActual);
+
+  }
 
   return (
     <div className='container'>
@@ -34,7 +63,23 @@ function App() {
           setBusqueda={setBusqueda}
         />
       </div>
-     
+
+     <div className='row justify-content-center'>
+
+        <ListadoImagenes imagenes={imagenes} />
+        <button
+          type='button'
+          className='bbtn btn-info mr-1'
+          onClick={paginaAnterior}
+        >&laquo; Anterior </button>
+
+        <button
+          type='button'
+          className='bbtn btn-info'
+          onClick={paginaSiguiente}
+        >Siguiente &raquo;</button>
+
+     </div>     
     </div>
   );
 }
